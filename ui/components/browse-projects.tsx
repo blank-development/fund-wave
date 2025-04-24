@@ -4,7 +4,6 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { Search, Filter, ArrowLeft } from "lucide-react";
-import { useRouter, useSearchParams } from "next/navigation";
 import { useAccount } from "wagmi";
 
 import { Button } from "@/components/ui/button";
@@ -13,7 +12,6 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Progress } from "@/components/ui/progress";
 import { cn } from "@/lib/utils";
 import {
-  Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
@@ -49,8 +47,6 @@ export default function BrowseProjects() {
   const [search, setSearch] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string>("");
   const [sortBy, setSortBy] = useState<string>("newest");
-  const router = useRouter();
-  const searchParams = useSearchParams();
   const { address } = useAccount();
 
   // Fetch projects
@@ -108,7 +104,7 @@ export default function BrowseProjects() {
             <Link href="/dashboard">
               <Button
                 variant="outline"
-                className="border-gray-700 hover:border-gray-600"
+                className="bg-white text-black hover:bg-white hover:text-black"
               >
                 Dashboard
               </Button>
@@ -122,7 +118,7 @@ export default function BrowseProjects() {
           <h1 className="text-3xl md:text-4xl font-bold mb-4">
             Discover Projects
           </h1>
-          <p className="text-gray-400 max-w-2xl">
+          <p className="text-white max-w-2xl">
             Explore innovative projects from creators around the world and
             support the ideas you believe in.
           </p>
@@ -142,8 +138,8 @@ export default function BrowseProjects() {
 
           {/* Filters Sidebar */}
           <div className={cn("w-full md:w-64 space-y-6")}>
-            <div className="bg-gray-900 rounded-lg p-6">
-              <h3 className="font-medium mb-4">Categories</h3>
+            <div className="bg-white rounded-lg p-6">
+              <h3 className="font-medium mb-4 text-black">Categories</h3>
               <div className="space-y-2">
                 {categories.map((category) => (
                   <div key={category} className="flex items-center space-x-2">
@@ -154,7 +150,7 @@ export default function BrowseProjects() {
                     />
                     <label
                       htmlFor={`category-${category}`}
-                      className="text-sm text-gray-300 cursor-pointer"
+                      className="text-sm text-black cursor-pointer"
                     >
                       {category}
                     </label>
@@ -163,8 +159,8 @@ export default function BrowseProjects() {
               </div>
             </div>
 
-            <div className="bg-gray-900 rounded-lg p-6">
-              <h3 className="font-medium mb-4">Sort By</h3>
+            <div className="bg-white rounded-lg p-6">
+              <h3 className="font-medium mb-4 text-black">Sort By</h3>
               <div className="space-y-2">
                 {[
                   { id: "newest", label: "Newest" },
@@ -183,7 +179,7 @@ export default function BrowseProjects() {
                     />
                     <label
                       htmlFor={option.id}
-                      className="text-sm text-gray-300 cursor-pointer"
+                      className="text-sm text-black cursor-pointer"
                     >
                       {option.label}
                     </label>
@@ -203,7 +199,7 @@ export default function BrowseProjects() {
                 placeholder="Search projects..."
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                className="pl-10 bg-gray-900 border-gray-800 focus:border-gray-700"
+                className="pl-10 bg-white text-black border-gray-800 focus:border-gray-700"
               />
             </div>
 
@@ -226,19 +222,19 @@ export default function BrowseProjects() {
                 {[...Array(3)].map((_, index) => (
                   <div
                     key={index}
-                    className="bg-gray-900 border border-gray-800 rounded-lg overflow-hidden"
+                    className="bg-white border rounded-lg overflow-hidden"
                   >
-                    <div className="aspect-video bg-gray-800 animate-pulse" />
+                    <div className="aspect-video bg-black animate-pulse h-52 w-full" />
                     <div className="p-6 space-y-4">
                       <div className="flex items-center space-x-2">
-                        <div className="h-8 w-8 rounded-full bg-gray-800 animate-pulse" />
-                        <div className="h-4 w-24 bg-gray-800 animate-pulse rounded" />
+                        <div className="h-8 w-8 rounded-full bg-black animate-pulse" />
+                        <div className="h-4 w-24 bg-black animate-pulse rounded" />
                       </div>
-                      <div className="h-6 w-3/4 bg-gray-800 animate-pulse rounded" />
+                      <div className="h-6 w-3/4 bg-black animate-pulse rounded" />
                       <div className="space-y-2">
                         <div className="flex justify-between">
-                          <div className="h-4 w-20 bg-gray-800 animate-pulse rounded" />
-                          <div className="h-4 w-12 bg-gray-800 animate-pulse rounded" />
+                          <div className="h-4 w-20 bg-black animate-pulse rounded" />
+                          <div className="h-4 w-12 bg-black animate-pulse rounded" />
                         </div>
                       </div>
                     </div>
@@ -253,7 +249,7 @@ export default function BrowseProjects() {
                     href={`/campaign/${project.id}`}
                     className="block"
                   >
-                    <Card className="bg-gray-900 border-gray-800 hover:border-gray-700 transition-colors">
+                    <Card className="bg-white border-gray-800 hover:border-gray-700 transition-colors">
                       <CardHeader className="p-0">
                         <div className="aspect-video relative">
                           <img
@@ -273,22 +269,22 @@ export default function BrowseProjects() {
                               alt={project.creator.walletAddress}
                             />
                           </Avatar>
-                          <span className="text-sm text-gray-400">
+                          <span className="text-sm text-black">
                             By{" "}
                             {project.creator.firstName +
                               " " +
                               project.creator.lastName}
                           </span>
                         </div>
-                        <CardTitle className="text-xl mb-2">
+                        <CardTitle className="text-xl mb-2 text-black">
                           {project.title}
                         </CardTitle>
                         <div className="space-y-2">
                           <div className="flex justify-between text-sm">
-                            <span className="text-gray-400">
+                            <span className="text-black">
                               ${project.raised.toLocaleString()} raised
                             </span>
-                            <span className="text-gray-400">
+                            <span className="text-black">
                               {Math.round(
                                 (project.raised / project.goal) * 100
                               )}
@@ -300,10 +296,10 @@ export default function BrowseProjects() {
                             className="h-2"
                           />
                           <div className="flex justify-between text-sm">
-                            <span className="text-gray-400">
+                            <span className="text-black">
                               {project.backers} backers
                             </span>
-                            <span className="text-gray-400">
+                            <span className="text-black">
                               {Math.round(project.daysLeft / 86400)} days left
                             </span>
                           </div>

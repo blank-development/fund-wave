@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { signIn } from "next-auth/react";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 
@@ -25,7 +24,7 @@ export default function RegisterPage() {
     setIsLoading(true);
 
     try {
-      const response = await fetch("/api/register", {
+      const response = await fetch("/api/auth/register", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -44,16 +43,10 @@ export default function RegisterPage() {
         throw new Error(data.error || "Something went wrong");
       }
 
-      // Sign in the user after successful registration
-      const result = await signIn("credentials", {
-        email,
-        password,
-        redirect: false,
+      toast({
+        title: "Success",
+        description: "Account created successfully!",
       });
-
-      if (result?.error) {
-        throw new Error("Failed to sign in after registration");
-      }
 
       router.push("/dashboard");
       router.refresh();

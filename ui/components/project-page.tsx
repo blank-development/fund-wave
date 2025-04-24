@@ -61,25 +61,25 @@ export default function ProjectPage({ id }: { id: string }) {
   const { address } = useAccount();
   const { toast } = useToast();
 
+  const fetchProject = async () => {
+    try {
+      const response = await fetch(`/api/projects/${id}`);
+      if (!response.ok) {
+        throw new Error("Failed to fetch project");
+      }
+      const data = await response.json();
+      setProject(data);
+    } catch (error) {
+      setError(
+        error instanceof Error ? error.message : "Failed to fetch project"
+      );
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   // Fetch project data
   useEffect(() => {
-    const fetchProject = async () => {
-      try {
-        const response = await fetch(`/api/projects/${id}`);
-        if (!response.ok) {
-          throw new Error("Failed to fetch project");
-        }
-        const data = await response.json();
-        setProject(data);
-      } catch (error) {
-        setError(
-          error instanceof Error ? error.message : "Failed to fetch project"
-        );
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
     fetchProject();
   }, [id]);
 
@@ -94,31 +94,14 @@ export default function ProjectPage({ id }: { id: string }) {
     addComment,
   } = usePublicComments(project?.id);
 
-  // Initialize campaign info
-  const {
-    campaign,
-    isLoading: isLoadingCampaign,
-    error: campaignError,
-  } = useCampaignInfo(project?.id);
-
   // Initialize campaign contribution
-  const {
-    contributeToCampaign,
-    isLoading: isContributing,
-    error: contributionError,
-  } = useCampaignContribution(project?.id);
+  const { contributeToCampaign } = useCampaignContribution(project?.id);
 
   // Initialize token approval
-  const {
-    approveToken,
-    isLoading: isApproving,
-    error: approvalError,
-  } = useTokenApproval(
+  const { approveToken } = useTokenApproval(
     process.env.NEXT_PUBLIC_TOKEN_ADDRESS || "",
     project?.campaignAddress || ""
   );
-
-  console.log(project);
 
   const handleSubmitComment = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -152,6 +135,7 @@ export default function ProjectPage({ id }: { id: string }) {
     }
 
     try {
+      setIsLoading(true);
       const amount = selectedTier
         ? contributionTiers[selectedTier].amount
         : Number(customAmount);
@@ -164,6 +148,8 @@ export default function ProjectPage({ id }: { id: string }) {
       // Then contribute
       await contributeToCampaign(project?.campaignAddress || "", amountInWei);
 
+      await fetchProject();
+      setIsLoading(false);
       setShowContributeModal(false);
       toast({
         title: "Success",
@@ -179,12 +165,23 @@ export default function ProjectPage({ id }: { id: string }) {
     }
   };
 
+  if (!project) {
+    return (
+      <div className="min-h-screen bg-black text-white flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-white mx-auto mb-4"></div>
+          <p>Loading campaign...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-black text-white">
       <header className="h-16 border-b border-gray-800 flex items-center px-6">
         <Link
           href="/browse-projects"
-          className="flex items-center text-gray-400 hover:text-white transition-colors"
+          className="flex items-center text-white hover:text-white transition-colors"
         >
           <ArrowLeft className="mr-2 h-4 w-4" />
           Back to projects
@@ -201,7 +198,7 @@ export default function ProjectPage({ id }: { id: string }) {
               <h1 className="text-3xl md:text-4xl font-bold mb-4">
                 {project.title}
               </h1>
-              <p className="text-gray-400 text-lg mb-4">
+              <p className="text-white text-lg mb-4">
                 {project.description.split("\n\n")[0]}
               </p>
               <div className="flex items-center space-x-4">
@@ -220,10 +217,8 @@ export default function ProjectPage({ id }: { id: string }) {
                     <span className="text-white">{project.creator.name}</span>
                   </span>
                 </div>
-                <span className="text-gray-500">•</span>
-                <span className="text-sm text-gray-400">
-                  {project.category}
-                </span>
+                <span className="text-white">•</span>
+                <span className="text-sm text-white">{project.category}</span>
               </div>
             </div>
 
@@ -240,7 +235,7 @@ export default function ProjectPage({ id }: { id: string }) {
               {/* Project Details */}
               <div className="md:col-span-2">
                 <Tabs defaultValue="story" className="w-full">
-                  <TabsList className="grid w-full grid-cols-3 bg-gray-900">
+                  <TabsList className="grid w-full grid-cols-3 bg-black text-white">
                     <TabsTrigger value="story">Story</TabsTrigger>
                     <TabsTrigger value="updates">
                       Updates ({project.updates.length})
@@ -277,7 +272,7 @@ export default function ProjectPage({ id }: { id: string }) {
                         ))}
                       </div>
                     ) : (
-                      <div className="text-center py-12 text-gray-400">
+                      <div className="text-center py-12 text-white">
                         <p>No updates yet. Check back soon!</p>
                       </div>
                     )}
@@ -285,7 +280,7 @@ export default function ProjectPage({ id }: { id: string }) {
                   <TabsContent value="comments" className="pt-6">
                     <div className="space-y-8">
                       {/* Anonymous Comments Section */}
-                      <div className="bg-gray-900 rounded-lg p-6">
+                      <div className="bg-white text-black rounded-lg p-6">
                         <h3 className="text-lg font-medium mb-4">
                           Anonymous Comments
                         </h3>
@@ -298,12 +293,12 @@ export default function ProjectPage({ id }: { id: string }) {
                               group={group}
                             />
                           ) : (
-                            <p className="text-gray-400">
+                            <p className="text-black">
                               Loading anonymous comment system...
                             </p>
                           )
                         ) : (
-                          <p className="text-gray-400">
+                          <p className="text-black">
                             Connect your wallet to post anonymous comments
                           </p>
                         )}
@@ -324,7 +319,7 @@ export default function ProjectPage({ id }: { id: string }) {
                               placeholder="Leave a comment..."
                               value={commentText}
                               onChange={(e) => setCommentText(e.target.value)}
-                              className="bg-gray-900 border-gray-800"
+                              className="bg-white border-black text-black"
                             />
                             <Button
                               type="submit"
@@ -334,20 +329,20 @@ export default function ProjectPage({ id }: { id: string }) {
                             </Button>
                           </form>
                         ) : (
-                          <p className="text-gray-400">
+                          <p className="text-white text-center">
                             Connect your wallet to post comments
                           </p>
                         )}
 
                         <div className="mt-8 space-y-6">
                           {isLoadingComments ? (
-                            <p className="text-gray-400">Loading comments...</p>
+                            <p className="text-white">Loading comments...</p>
                           ) : commentsError ? (
                             <p className="text-red-400">
                               Error loading comments: {commentsError}
                             </p>
                           ) : comments.length === 0 ? (
-                            <p className="text-gray-400">
+                            <p className="text-white">
                               No comments yet. Be the first to comment!
                             </p>
                           ) : (
@@ -401,15 +396,15 @@ export default function ProjectPage({ id }: { id: string }) {
                   </TabsContent>
                 </Tabs>
               </div>
-
+              {console.log(project)}
               {/* Funding Status */}
               <div className="space-y-6">
-                <div className="bg-gray-900 rounded-lg p-6">
+                <div className="bg-white text-black rounded-lg p-6">
                   <div className="mb-2">
                     <span className="text-2xl font-bold">
                       ${project.raised.toLocaleString()}
                     </span>
-                    <span className="text-gray-400 text-sm ml-2">
+                    <span className="text-black text-sm ml-2">
                       of ${project.goal.toLocaleString()} goal
                     </span>
                   </div>
@@ -420,24 +415,24 @@ export default function ProjectPage({ id }: { id: string }) {
                   <div className="grid grid-cols-3 text-center">
                     <div>
                       <div className="text-xl font-bold">{project.backers}</div>
-                      <div className="text-xs text-gray-400">Backers</div>
+                      <div className="text-xs text-black">Backers</div>
                     </div>
                     <div>
                       <div className="text-xl font-bold">
                         {Math.round(project.daysLeft / 86400)}
                       </div>
-                      <div className="text-xs text-gray-400">Days Left</div>
+                      <div className="text-xs text-black">Days Left</div>
                     </div>
                     <div>
                       <div className="text-xl font-bold">
                         {Math.round((project.raised / project.goal) * 100)}%
                       </div>
-                      <div className="text-xs text-gray-400">Funded</div>
+                      <div className="text-xs text-black">Funded</div>
                     </div>
                   </div>
 
                   <Button
-                    className="w-full mt-6 bg-white text-black hover:bg-gray-200"
+                    className="w-full mt-6 bg-black text-white hover:bg-black hover:text-white"
                     onClick={() => setShowContributeModal(true)}
                   >
                     Back This Project
@@ -447,7 +442,7 @@ export default function ProjectPage({ id }: { id: string }) {
                     <Button
                       variant="ghost"
                       size="sm"
-                      className="text-gray-400 hover:text-white"
+                      className="text-black hover:text-black hover:bg-white"
                     >
                       <Share2 className="h-4 w-4 mr-1" />
                       Share
@@ -455,7 +450,7 @@ export default function ProjectPage({ id }: { id: string }) {
                     <Button
                       variant="ghost"
                       size="sm"
-                      className="text-gray-400 hover:text-white"
+                      className="text-black hover:text-black hover:bg-white"
                     >
                       <Heart className="h-4 w-4 mr-1" />
                       Save
@@ -463,7 +458,7 @@ export default function ProjectPage({ id }: { id: string }) {
                     <Button
                       variant="ghost"
                       size="sm"
-                      className="text-gray-400 hover:text-white"
+                      className="text-black hover:text-black hover:bg-white"
                     >
                       <Flag className="h-4 w-4 mr-1" />
                       Report
@@ -471,8 +466,10 @@ export default function ProjectPage({ id }: { id: string }) {
                   </div>
                 </div>
 
-                <div className="bg-gray-900 rounded-lg p-6">
-                  <h3 className="font-medium mb-4">About the Creator</h3>
+                <div className="bg-white rounded-lg p-6">
+                  <h3 className="font-medium mb-4 text-black">
+                    About the Creator
+                  </h3>
                   <div className="flex items-center mb-4">
                     <Avatar className="h-12 w-12 mr-4">
                       <AvatarImage
@@ -483,9 +480,9 @@ export default function ProjectPage({ id }: { id: string }) {
                         {project.creator.name.charAt(0)}
                       </AvatarFallback>
                     </Avatar>
-                    <div>
+                    <div className="text-black">
                       <div className="font-medium">{project.creator.name}</div>
-                      <div className="text-sm text-gray-400">
+                      <div className="text-sm text-black">
                         {project.creator.campaigns} campaigns ·{" "}
                         {project.creator.backedProjects} backed
                       </div>
@@ -493,7 +490,7 @@ export default function ProjectPage({ id }: { id: string }) {
                   </div>
                   <Button
                     variant="outline"
-                    className="w-full border-gray-700 hover:bg-gray-800"
+                    className="w-full bg-black text-white hover:bg-black hover:text-white"
                   >
                     <Send className="h-4 w-4 mr-2" />
                     Contact Creator
@@ -514,16 +511,18 @@ export default function ProjectPage({ id }: { id: string }) {
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.95 }}
               transition={{ duration: 0.2 }}
-              className="bg-gray-900 rounded-lg w-full max-w-md max-h-[90vh] overflow-y-auto"
+              className="bg-black rounded-lg w-full max-w-md max-h-[90vh] overflow-y-auto"
             >
               <div className="p-6">
                 <div className="flex justify-between items-center mb-4">
-                  <h2 className="text-xl font-bold">Back this project</h2>
+                  <h2 className="text-xl font-bold text-white">
+                    Back this project
+                  </h2>
                   <Button
                     variant="ghost"
                     size="icon"
                     onClick={() => setShowContributeModal(false)}
-                    className="text-gray-400 hover:text-white"
+                    className="text-white hover:text-white hover:bg-black"
                   >
                     <X className="h-5 w-5" />
                   </Button>
@@ -641,9 +640,7 @@ export default function ProjectPage({ id }: { id: string }) {
                       onClick={handleContribute}
                       disabled={selectedTier === null && !customAmount}
                     >
-                      {isContributing || isApproving
-                        ? "Contributing..."
-                        : "Complete Contribution"}
+                      {isLoading ? "Contributing..." : "Complete Contribution"}
                     </Button>
                   </div>
                 </div>

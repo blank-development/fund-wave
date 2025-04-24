@@ -1,8 +1,7 @@
 import { NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
-import { hash } from "bcryptjs";
+import { cookies } from "next/headers";
+import { register } from "@/lib/auth";
 import { z } from "zod";
-import { generateToken } from "@/lib/auth";
 
 const registerSchema = z.object({
   firstName: z.string().min(2).max(50),
@@ -16,46 +15,23 @@ export async function POST(req: Request) {
     const body = await req.json();
     const { firstName, lastName, email, password } = registerSchema.parse(body);
 
-    // Check if user already exists
-    const existingUser = await prisma.user.findUnique({
-      where: { email },
-    });
-
-    if (existingUser) {
-      return NextResponse.json(
-        { error: "User already exists" },
-        { status: 400 }
-      );
-    }
-
-    // Hash password
-    const hashedPassword = await hash(password, 12);
-
-    // Create user
-    const user = await prisma.user.create({
-      data: {
-        firstName,
-        lastName,
-        email,
-        password: hashedPassword,
-      },
-    });
-
-    // Generate JWT token
-    const token = await generateToken(user);
-
-    return NextResponse.json(
-      {
-        user: {
-          id: user.id,
-          firstName: user.firstName,
-          lastName: user.lastName,
-          email: user.email,
-        },
-        token,
-      },
-      { status: 201 }
+    const { user, token } = await register(
+      firstName,
+      lastName,
+      email,
+      password
     );
+
+    // Set the session cookie
+    const cookieStore = cookies();
+    cookieStore.set("session", token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
+      maxAge: 30 * 24 * 60 * 60, // 30 days
+    });
+
+    return NextResponse.json({ user });
   } catch (error) {
     if (error instanceof z.ZodError) {
       return NextResponse.json(
@@ -66,8 +42,10 @@ export async function POST(req: Request) {
 
     console.error("Error in register:", error);
     return NextResponse.json(
-      { error: "Something went wrong" },
-      { status: 500 }
+      {
+        error: error instanceof Error ? error.message : "Something went wrong",
+      },
+      { status: 400 }
     );
   }
 }

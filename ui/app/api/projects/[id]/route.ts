@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { getContributions } from "@/lib/graphql";
 
 export async function GET(
   request: Request,
@@ -48,11 +49,6 @@ export async function GET(
             createdAt: "desc",
           },
         },
-        contributions: {
-          select: {
-            amount: true,
-          },
-        },
       },
     });
 
@@ -61,9 +57,8 @@ export async function GET(
     }
 
     // Calculate total raised from contributions
-    const totalRaised = project.contributions.reduce(
-      (sum, contribution) => sum + Number(contribution.amount),
-      0
+    const { totalRaised, backers } = await getContributions(
+      project.campaignAddress || ""
     );
 
     // Format the response
@@ -76,7 +71,7 @@ export async function GET(
       campaignAddress: project.campaignAddress,
       goal: project.goal,
       raised: totalRaised,
-      backers: project.contributions.length,
+      backers: backers,
       daysLeft: project.daysLeft,
       creator: {
         id: project.creator.id,

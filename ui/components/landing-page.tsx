@@ -11,6 +11,7 @@ import * as THREE from "three";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { useMobile } from "@/hooks/use-mobile";
+import { useAccount } from "wagmi";
 
 // Piggy Bank component representing savings and funding
 function PiggyBank(props: any) {
@@ -342,6 +343,8 @@ export default function LandingPage() {
 
   const [hasScrolled, setHasScrolled] = useState(false);
 
+  const { address } = useAccount();
+
   useEffect(() => {
     const handleScroll = () => {
       setHasScrolled(window.scrollY > 10);
@@ -360,9 +363,9 @@ export default function LandingPage() {
           hasScrolled ? "bg-black/80 backdrop-blur-md py-3" : "py-5"
         )}
       >
-        <div className="container flex items-center justify-between">
+        <div className="container flex items-center justify-between m-auto">
           <Link href="/" className="text-xl font-bold tracking-tighter">
-            FUND<span className="text-gray-400">WAVE</span>
+            FUNDWAVE
           </Link>
 
           {!isMobile ? (
@@ -386,19 +389,31 @@ export default function LandingPage() {
                 About
               </Link>
               <div className="flex items-center space-x-4">
-                <Button
-                  asChild
-                  variant="outline"
-                  className="border-white bg-black hover:bg-black hover:text-white"
-                >
-                  <Link href="/login">Log In</Link>
-                </Button>
-                <Button
-                  asChild
-                  className="bg-white text-black hover:bg-white hover:text-black"
-                >
-                  <Link href="/register">Sign Up</Link>
-                </Button>
+                {address ? (
+                  <Button
+                    asChild
+                    variant="outline"
+                    className="bg-white text-black hover:bg-white hover:text-black"
+                  >
+                    <Link href="/dashboard">Dashboard</Link>
+                  </Button>
+                ) : (
+                  <>
+                    <Button
+                      asChild
+                      variant="outline"
+                      className="border-white bg-black hover:bg-black hover:text-white"
+                    >
+                      <Link href="/login">Log In</Link>
+                    </Button>
+                    <Button
+                      asChild
+                      className="bg-white text-black hover:bg-white hover:text-black"
+                    >
+                      <Link href="/register">Sign Up</Link>
+                    </Button>
+                  </>
+                )}
               </div>
             </nav>
           ) : (
@@ -571,7 +586,7 @@ export default function LandingPage() {
         className="py-24 bg-white text-black"
         style={{ y: position }}
       >
-        <div className="container px-4">
+        <div className="container px-4 flex flex-col items-center justify-center w-full m-auto">
           <div className="max-w-4xl mx-auto text-center">
             <h2 className="text-3xl md:text-5xl font-bold tracking-tighter mb-6">
               How It Works
@@ -628,7 +643,7 @@ export default function LandingPage() {
       </motion.section>
 
       <section className="py-24 bg-black text-white">
-        <div className="container px-4">
+        <div className="container px-4 flex flex-col items-center justify-center w-full m-auto">
           <div className="max-w-4xl mx-auto">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
               <div>
@@ -667,11 +682,11 @@ export default function LandingPage() {
       </section>
 
       <footer className="py-12 bg-black border-t border-gray-800">
-        <div className="container px-4">
+        <div className="container px-4 m-auto">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
             <div>
               <Link href="/" className="text-xl font-bold tracking-tighter">
-                FUND<span className="text-gray-400">WAVE</span>
+                FUNDWAVE
               </Link>
               <p className="mt-4 text-gray-400 text-sm">
                 The modern platform for creators and innovators to bring their
@@ -721,7 +736,7 @@ export default function LandingPage() {
             ))}
           </div>
 
-          <div className="mt-12 pt-8 border-t border-gray-800 flex flex-col md:flex-row justify-between items-center">
+          <div className="mt-12 pt-8 border-t border-gray-800 flex flex-col md:flex-row justify-between items-center w-full">
             <p className="text-gray-400 text-sm">
               © {new Date().getFullYear()} FundWave. All rights reserved.
             </p>

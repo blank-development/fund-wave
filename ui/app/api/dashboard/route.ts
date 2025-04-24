@@ -1,21 +1,34 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
+import { cookies } from "next/headers";
+import { verifyToken } from "@/lib/auth";
+import { getAllContributions } from "@/lib/graphql";
 
 export async function GET() {
   try {
-    const session = await getServerSession(authOptions);
-    console.log(session);
-    if (!session?.user?.email) {
+    const cookieStore = await cookies();
+    const token = cookieStore.get("session")?.value;
+
+    if (!token) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
+
+    const payload = await verifyToken(token);
+    if (!payload || !payload.userId) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const user = await prisma.user.findUnique({
+      where: {
+        id: payload.userId,
+      },
+    });
 
     // Get user's campaigns
     const userCampaigns = await prisma.project.findMany({
       where: {
         creator: {
-          email: session.user.email,
+          id: payload.userId,
         },
       },
       include: {
@@ -30,9 +43,7 @@ export async function GET() {
     // Get campaigns backed by the user
     const backedCampaigns = await prisma.contribution.findMany({
       where: {
-        contributor: {
-          email: session.user.email,
-        },
+        userId: payload.userId,
       },
       include: {
         project: {
@@ -46,54 +57,14 @@ export async function GET() {
       },
     });
 
-    // Calculate analytics
-    const totalRaised = userCampaigns.reduce(
-      (sum, campaign) =>
-        sum +
-        campaign.contributions.reduce(
-          (campaignSum, contribution) => campaignSum + contribution.amount,
-          0
-        ),
-      0
-    );
-
-    const totalBackers = userCampaigns.reduce(
-      (sum, campaign) => sum + campaign.contributions.length,
-      0
-    );
+    const { totalRaised, totalBackers } = await getAllContributions();
 
     const averageContribution =
       totalBackers > 0 ? totalRaised / totalBackers : 0;
 
-    // Get daily views (last 7 days)
-    const dailyViews = await prisma.projectView.findMany({
-      where: {
-        project: {
-          creator: {
-            email: session.user.email,
-          },
-        },
-        createdAt: {
-          gte: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000),
-        },
-      },
-      select: {
-        createdAt: true,
-      },
-      orderBy: {
-        createdAt: "asc",
-      },
-    });
-
-    // Group views by day
-    const viewsByDay = dailyViews.reduce((acc, view) => {
-      const day = view.createdAt.toISOString().split("T")[0];
-      acc[day] = (acc[day] || 0) + 1;
-      return acc;
-    }, {} as Record<string, number>);
-
     // Format response
     const response = {
+      user,
       userCampaigns: userCampaigns.map((campaign) => ({
         id: campaign.id,
         title: campaign.title,
@@ -107,16 +78,10 @@ export async function GET() {
         daysLeft: Math.max(
           0,
           Math.ceil(
-            (new Date(campaign.endDate).getTime() - Date.now()) /
+            (new Date(campaign.daysLeft).getTime() - Date.now()) /
               (1000 * 60 * 60 * 24)
           )
         ),
-        status:
-          campaign.status === "ACTIVE"
-            ? "active"
-            : campaign.status === "SUCCESSFUL"
-            ? "successful"
-            : "failed",
       })),
       backedCampaigns: backedCampaigns.map((contribution) => ({
         id: contribution.project.id,
@@ -125,15 +90,12 @@ export async function GET() {
         image: contribution.project.imageUrl || "/placeholder.svg",
         contribution: contribution.amount,
         date: contribution.createdAt.toISOString(),
-        status:
-          contribution.project.status === "ACTIVE" ? "active" : "successful",
       })),
       analytics: {
         totalRaised,
         totalBackers,
         averageContribution,
         conversionRate: 4.2, // This would need to be calculated based on actual data
-        dailyViews: Object.values(viewsByDay),
         referralSources: [
           { source: "Direct", percentage: 40 },
           { source: "Social Media", percentage: 30 },
@@ -146,9 +108,9 @@ export async function GET() {
 
     return NextResponse.json(response);
   } catch (error) {
-    console.error("Error fetching dashboard data:", error);
+    console.error("Error in dashboard:", error);
     return NextResponse.json(
-      { error: "Failed to fetch dashboard data" },
+      { error: "Something went wrong" },
       { status: 500 }
     );
   }

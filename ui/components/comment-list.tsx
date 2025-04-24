@@ -41,7 +41,7 @@ export function CommentList({ campaignAddress }: CommentListProps) {
     <div className="space-y-4">
       <h3 className="text-lg font-medium">Anonymous Comments</h3>
       {comments.length === 0 ? (
-        <p className="text-sm text-gray-500">No comments yet</p>
+        <p className="text-sm text-black">No comments yet</p>
       ) : (
         <div className="space-y-4">
           {comments.map((comment, index) => (
@@ -49,10 +49,10 @@ export function CommentList({ campaignAddress }: CommentListProps) {
               key={`${comment.nullifier}-${index}`}
               className="rounded-lg border p-4"
             >
-              <p className="text-sm text-gray-500">
+              <p className="text-sm text-black">
                 Anonymous • {new Date(comment.timestamp).toLocaleString()}
               </p>
-              <p className="mt-2">{comment.comment}</p>
+              <p className="mt-2 text-black">{comment.comment}</p>
             </div>
           ))}
         </div>

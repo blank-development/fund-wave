@@ -1,7 +1,6 @@
 import { NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
-import { compare } from "bcryptjs";
-import { generateToken } from "@/lib/auth";
+import { cookies } from "next/headers";
+import { login } from "@/lib/auth";
 import { z } from "zod";
 
 const loginSchema = z.object({
@@ -14,37 +13,18 @@ export async function POST(req: Request) {
     const body = await req.json();
     const { email, password } = loginSchema.parse(body);
 
-    const user = await prisma.user.findUnique({
-      where: { email },
+    const { user, token } = await login(email, password);
+
+    // Set the session cookie
+    const cookieStore = cookies();
+    cookieStore.set("session", token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
+      maxAge: 30 * 24 * 60 * 60, // 30 days
     });
 
-    if (!user || !user.password) {
-      return NextResponse.json(
-        { error: "Invalid credentials" },
-        { status: 401 }
-      );
-    }
-
-    const isPasswordValid = await compare(password, user.password);
-
-    if (!isPasswordValid) {
-      return NextResponse.json(
-        { error: "Invalid credentials" },
-        { status: 401 }
-      );
-    }
-
-    const token = await generateToken(user);
-
-    return NextResponse.json({
-      user: {
-        id: user.id,
-        firstName: user.firstName,
-        lastName: user.lastName,
-        email: user.email,
-      },
-      token,
-    });
+    return NextResponse.json({ user });
   } catch (error) {
     if (error instanceof z.ZodError) {
       return NextResponse.json(
@@ -54,9 +34,6 @@ export async function POST(req: Request) {
     }
 
     console.error("Error in login:", error);
-    return NextResponse.json(
-      { error: "Something went wrong" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Invalid credentials" }, { status: 401 });
   }
 }

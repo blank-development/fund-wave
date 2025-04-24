@@ -177,7 +177,7 @@ export default function StartCampaignForm() {
       <div className="h-16 border-b border-gray-800 flex items-center px-6">
         <Link
           href="/"
-          className="flex items-center text-gray-400 hover:text-white transition-colors"
+          className="flex items-center text-black hover:text-white transition-colors"
         >
           <ArrowLeft className="mr-2 h-4 w-4" />
           Back to home
@@ -186,7 +186,7 @@ export default function StartCampaignForm() {
 
       <div className="flex-1 flex flex-col md:flex-row">
         <div className="w-full md:w-1/2 relative overflow-hidden">
-          <div className="absolute inset-0 bg-gradient-to-b from-gray-900 to-black">
+          <div className="absolute inset-0 bg-gradient-to-b from-black to-black">
             <div className="absolute inset-0 opacity-20">
               {/* Grid pattern */}
               <div
@@ -210,7 +210,7 @@ export default function StartCampaignForm() {
               <h1 className="text-3xl md:text-4xl font-bold mb-4">
                 Start Your Campaign
               </h1>
-              <p className="text-gray-400 mb-8">
+              <p className="text-white mb-8">
                 Create a compelling campaign to bring your vision to life.
               </p>
             </motion.div>
@@ -260,12 +260,12 @@ export default function StartCampaignForm() {
                         id="title"
                         name="title"
                         placeholder="Enter your campaign title"
-                        className="bg-gray-900 border-gray-800 focus:border-gray-700 text-white placeholder:text-gray-500"
+                        className="bg-white border-gray-800 focus:border-gray-700 text-black placeholder:text-gray-500"
                       />
                       <ErrorMessage
                         name="title"
                         component="div"
-                        className="text-red-500 text-sm mt-1"
+                        className="text-white text-sm mt-1"
                       />
                     </div>
 
@@ -279,7 +279,7 @@ export default function StartCampaignForm() {
                               form.setFieldValue("category", value);
                             }}
                           >
-                            <SelectTrigger className="bg-gray-900 border-gray-800 focus:border-gray-700 text-white">
+                            <SelectTrigger className="bg-white border-gray-800 focus:border-gray-700 text-black">
                               <SelectValue placeholder="Select a category" />
                             </SelectTrigger>
                             <SelectContent>
@@ -295,7 +295,7 @@ export default function StartCampaignForm() {
                       <ErrorMessage
                         name="category"
                         component="div"
-                        className="text-red-500 text-sm mt-1"
+                        className="text-white text-sm mt-1"
                       />
                     </div>
 
@@ -307,7 +307,7 @@ export default function StartCampaignForm() {
                           id="description"
                           name="description"
                           placeholder="Describe your campaign in detail..."
-                          className="bg-gray-900 border-gray-800 focus:border-gray-700 text-white placeholder:text-gray-500 min-h-[200px] pr-12"
+                          className="bg-white border-gray-800 focus:border-gray-700 text-black placeholder:text-gray-500 min-h-[200px] pr-12"
                         />
                         <button
                           type="button"
@@ -318,13 +318,13 @@ export default function StartCampaignForm() {
                           className="absolute right-2 top-2 p-2 text-gray-400 hover:text-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                           title="Rephrase description"
                         >
-                          <Wand2 className="w-5 h-5" />
+                          <Wand2 className="w-5 h-5 text-black" />
                         </button>
                       </div>
                       <ErrorMessage
                         name="description"
                         component="div"
-                        className="text-red-500 text-sm mt-1"
+                        className="text-white text-sm mt-1"
                       />
                     </div>
 
@@ -337,12 +337,12 @@ export default function StartCampaignForm() {
                           name="goal"
                           type="number"
                           placeholder="1000"
-                          className="bg-gray-900 border-gray-800 focus:border-gray-700 text-white placeholder:text-gray-500"
+                          className="bg-white border-gray-800 focus:border-gray-700 text-black placeholder:text-gray-500"
                         />
                         <ErrorMessage
                           name="goal"
                           component="div"
-                          className="text-red-500 text-sm mt-1"
+                          className="text-white text-sm mt-1"
                         />
                       </div>
                       <div className="space-y-2">
@@ -355,12 +355,12 @@ export default function StartCampaignForm() {
                           name="daysLeft"
                           type="number"
                           placeholder="30"
-                          className="bg-gray-900 border-gray-800 focus:border-gray-700 text-white placeholder:text-gray-500"
+                          className="bg-white border-gray-800 focus:border-gray-700 text-black placeholder:text-gray-500"
                         />
                         <ErrorMessage
                           name="daysLeft"
                           component="div"
-                          className="text-red-500 text-sm mt-1"
+                          className="text-white text-sm mt-1"
                         />
                       </div>
                     </div>
@@ -370,7 +370,7 @@ export default function StartCampaignForm() {
                       <div className="flex items-center justify-center w-full">
                         <label
                           htmlFor="image"
-                          className="flex flex-col items-center justify-center w-full h-64 border-2 border-gray-800 border-dashed rounded-lg cursor-pointer bg-gray-900 hover:bg-gray-800 relative"
+                          className="flex flex-col items-center justify-center w-full h-64 border-2 border-gray-800 border-dashed rounded-lg cursor-pointer bg-white relative"
                         >
                           {imagePreview ? (
                             <>
@@ -379,7 +379,7 @@ export default function StartCampaignForm() {
                                 alt="Preview"
                                 className="w-full h-full object-cover rounded-lg"
                               />
-                              <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity">
+                              <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center opacity-0">
                                 <p className="text-white text-sm">
                                   Click to change image
                                 </p>
@@ -387,14 +387,14 @@ export default function StartCampaignForm() {
                             </>
                           ) : (
                             <div className="flex flex-col items-center justify-center pt-5 pb-6">
-                              <Upload className="w-8 h-8 mb-4 text-gray-400" />
-                              <p className="mb-2 text-sm text-gray-400">
+                              <Upload className="w-8 h-8 mb-4 text-black" />
+                              <p className="mb-2 text-sm text-black">
                                 <span className="font-semibold">
                                   Click to upload
                                 </span>{" "}
                                 or drag and drop
                               </p>
-                              <p className="text-xs text-gray-500">
+                              <p className="text-xs text-black">
                                 PNG, JPG or GIF (MAX. 10MB)
                               </p>
                             </div>
@@ -402,7 +402,7 @@ export default function StartCampaignForm() {
                           <input
                             id="image"
                             type="file"
-                            className="hidden"
+                            className="hidden bg-white"
                             accept="image/*"
                             onChange={(event) => {
                               const file = event.currentTarget.files?.[0];
@@ -419,13 +419,13 @@ export default function StartCampaignForm() {
                       <ErrorMessage
                         name="image"
                         component="div"
-                        className="text-red-500 text-sm mt-1"
+                        className="text-white text-sm mt-1"
                       />
                     </div>
 
                     <Button
                       type="submit"
-                      className="w-full bg-white text-black hover:bg-gray-200"
+                      className="w-full bg-white text-black hover:bg-white hover:text-black"
                       disabled={isLoading || isSubmitting}
                     >
                       {isLoading ? "Creating campaign..." : "Create Campaign"}
