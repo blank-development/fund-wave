@@ -5,4 +5,5 @@ node_modules
 ./contracts/.env
 ./indexer/.env
 ./ui/.env
+./ui/.next
 
