@@ -1,0 +1,8 @@
+./ui/node_modules
+./contracts/node_modules
+./indexer/node_modules
+node_modules
+./contracts/.env
+./indexer/.env
+./ui/.env
+

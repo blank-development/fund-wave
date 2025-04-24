@@ -1,0 +1,76 @@
+generator client {
+    provider = "prisma-client-js"
+}
+
+datasource db {
+    provider = "postgresql"
+    url      = env("DATABASE_URL")
+}
+
+model User {
+    id            String         @id @default(cuid())
+    email         String         @unique
+    password      String
+    firstName     String
+    lastName      String
+    walletAddress String         @unique
+    username      String?
+    avatarUrl     String?
+    createdAt     DateTime       @default(now())
+    updatedAt     DateTime       @updatedAt
+    projects      Project[]
+    comments      Comment[]
+    contributions Contribution[]
+}
+
+model Project {
+    id              String         @id @default(uuid())
+    title           String
+    description     String
+    category        String
+    imageUrl        String?
+    goal            Float
+    raised          Float          @default(0)
+    backers         Int            @default(0)
+    daysLeft        Int
+    campaignAddress String?        @unique
+    creatorId       String
+    creator         User           @relation(fields: [creatorId], references: [id])
+    createdAt       DateTime       @default(now())
+    updatedAt       DateTime       @updatedAt
+    updates         Update[]
+    comments        Comment[]
+    contributions   Contribution[]
+}
+
+model Update {
+    id        String   @id @default(uuid())
+    projectId String
+    project   Project  @relation(fields: [projectId], references: [id])
+    title     String
+    content   String
+    createdAt DateTime @default(now())
+}
+
+model Comment {
+    id        String    @id @default(uuid())
+    projectId String
+    project   Project   @relation(fields: [projectId], references: [id])
+    userId    String
+    user      User      @relation(fields: [userId], references: [id])
+    content   String
+    replyToId String?
+    replyTo   Comment?  @relation("CommentReplies", fields: [replyToId], references: [id])
+    replies   Comment[] @relation("CommentReplies")
+    createdAt DateTime  @default(now())
+}
+
+model Contribution {
+    id        String   @id @default(uuid())
+    projectId String
+    project   Project  @relation(fields: [projectId], references: [id])
+    userId    String
+    user      User     @relation(fields: [userId], references: [id])
+    amount    Float
+    createdAt DateTime @default(now())
+}

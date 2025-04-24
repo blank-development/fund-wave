@@ -1,0 +1,8 @@
+{
+  "arbitrum-sepolia": {
+    "CampaignFactory": {
+      "address": "0x6fA761dC08FC02577CcAca92c7EC46034Dd26731",
+      "startBlock": 145950521
+    }
+  }
+}
