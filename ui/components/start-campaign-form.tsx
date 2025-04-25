@@ -62,6 +62,7 @@ const categories = [
 export default function StartCampaignForm() {
   const [isLoading, setIsLoading] = useState(false);
   const [isRephrasing, setIsRephrasing] = useState(false);
+  const [isGeneratingImage, setIsGeneratingImage] = useState(false);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const router = useRouter();
   const { toast } = useToast();
@@ -169,6 +170,57 @@ export default function StartCampaignForm() {
       });
     } finally {
       setIsRephrasing(false);
+    }
+  };
+
+  const handleGenerateImage = async (
+    description: string,
+    setFieldValue: (field: string, value: any) => void
+  ) => {
+    setIsGeneratingImage(true);
+    try {
+      const response = await fetch("/api/openai/generate-image", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ prompt: description }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || "Failed to generate image");
+      }
+
+      // Convert base64 to blob
+      const base64Response = await fetch(`data:image/png;base64,${data.image}`);
+      const blob = await base64Response.blob();
+
+      // Create a File object
+      const file = new File([blob], "generated-image.png", {
+        type: "image/png",
+      });
+
+      // Set the file in form values
+      setFieldValue("image", file);
+
+      // Update preview
+      setImagePreview(URL.createObjectURL(blob));
+
+      toast({
+        title: "Success",
+        description: "Image generated successfully!",
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description:
+          error instanceof Error ? error.message : "Failed to generate image",
+        variant: "destructive",
+      });
+    } finally {
+      setIsGeneratingImage(false);
     }
   };
 
@@ -379,7 +431,7 @@ export default function StartCampaignForm() {
                                 alt="Preview"
                                 className="w-full h-full object-cover rounded-lg"
                               />
-                              <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center opacity-0">
+                              <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity">
                                 <p className="text-white text-sm">
                                   Click to change image
                                 </p>
@@ -415,6 +467,32 @@ export default function StartCampaignForm() {
                             }}
                           />
                         </label>
+                      </div>
+                      <div className="flex justify-end mt-2">
+                        <Button
+                          type="button"
+                          variant="outline"
+                          className="bg-white text-black hover:bg-gray-200"
+                          disabled={isGeneratingImage || !values.description}
+                          onClick={() =>
+                            handleGenerateImage(
+                              values.description,
+                              setFieldValue
+                            )
+                          }
+                        >
+                          {isGeneratingImage ? (
+                            <>
+                              <div className="animate-spin rounded-full h-4 w-4 border-t-2 border-b-2 border-black mr-2"></div>
+                              Generating...
+                            </>
+                          ) : (
+                            <>
+                              <Wand2 className="w-4 h-4 mr-2" />
+                              Generate with AI
+                            </>
+                          )}
+                        </Button>
                       </div>
                       <ErrorMessage
                         name="image"

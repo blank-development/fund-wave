@@ -93,7 +93,7 @@
   "devDependencies": {
     "@types/bcryptjs": "^2.4.6",
     "@types/jsonwebtoken": "^9.0.9",
-    "@types/node": "^22",
+    "@types/node": "^22.15.0",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "postcss": "^8",

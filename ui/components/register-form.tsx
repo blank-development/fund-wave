@@ -121,7 +121,7 @@ export default function RegisterForm() {
 
       <div className="flex-1 flex flex-col md:flex-row">
         <div className="w-full md:w-1/2 relative overflow-hidden">
-          <div className="absolute inset-0 bg-gradient-to-b from-gray-900 to-black">
+          <div className="absolute inset-0 bg-gradient-to-b from-black to-black">
             <div className="absolute inset-0 opacity-20">
               {/* Grid pattern */}
               <div
