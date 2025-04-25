@@ -74,7 +74,9 @@ export async function getCampaignData(
   }
 }
 
-export async function getContributions(campaignId: string): Promise<number> {
+export async function getContributions(
+  campaignId: string
+): Promise<{ totalRaised: string; backers: number }> {
   try {
     const data = await graphqlClient.request(GET_CONTRIBUTIONS_QUERY, {
       id: campaignId,

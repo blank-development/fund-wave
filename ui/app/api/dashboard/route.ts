@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { cookies } from "next/headers";
 import { verifyToken } from "@/lib/auth";
-import { getAllContributions } from "@/lib/graphql";
+import { getAllContributions, getContributions } from "@/lib/graphql";
 
 export async function GET() {
   try {
@@ -62,27 +62,32 @@ export async function GET() {
     const averageContribution =
       totalBackers > 0 ? totalRaised / totalBackers : 0;
 
+    const enrichedUserCampaigns = await Promise.all(
+      userCampaigns.map(async (campaign) => {
+        const contributions = await getContributions(campaign.campaignAddress);
+
+        return {
+          id: campaign.id,
+          title: campaign.title,
+          image: campaign.imageUrl || "/placeholder.svg",
+          goal: campaign.goal,
+          raised: contributions.totalRaised,
+          backers: contributions.backers,
+          daysLeft: Math.max(
+            0,
+            Math.ceil(
+              (new Date(campaign.daysLeft).getTime() - Date.now()) /
+                (1000 * 60 * 60 * 24)
+            )
+          ),
+        };
+      })
+    );
+
     // Format response
     const response = {
       user,
-      userCampaigns: userCampaigns.map((campaign) => ({
-        id: campaign.id,
-        title: campaign.title,
-        image: campaign.imageUrl || "/placeholder.svg",
-        goal: campaign.goal,
-        raised: campaign.contributions.reduce(
-          (sum, contribution) => sum + contribution.amount,
-          0
-        ),
-        backers: campaign.contributions.length,
-        daysLeft: Math.max(
-          0,
-          Math.ceil(
-            (new Date(campaign.daysLeft).getTime() - Date.now()) /
-              (1000 * 60 * 60 * 24)
-          )
-        ),
-      })),
+      userCampaigns: enrichedUserCampaigns,
       backedCampaigns: backedCampaigns.map((contribution) => ({
         id: contribution.project.id,
         title: contribution.project.title,

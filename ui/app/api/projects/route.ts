@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { getCampaignData } from "@/lib/graphql";
+import { getCampaignData, getContributions } from "@/lib/graphql";
 import prisma from "@/lib/db";
 import { Project } from "@prisma/client";
 
@@ -63,9 +63,12 @@ export async function GET(request: Request) {
       projects.map(async (project: Project) => {
         if (project.campaignAddress) {
           const campaignData = await getCampaignData(project.campaignAddress);
+          const contributions = await getContributions(project.campaignAddress);
           if (campaignData) {
             return {
               ...project,
+              raised: contributions.totalRaised,
+              backers: contributions.backers,
               onchain_data: {
                 raised: campaignData.raised,
                 deadline: campaignData.deadline,
